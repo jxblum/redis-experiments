@@ -32,8 +32,8 @@
 		<jedis.version>4.3.2</jedis.version>
 		<lettuce.version>6.2.4.RELEASE</lettuce.version>
 -->
-		<redis-testcontainers.version>1.4.6</redis-testcontainers.version>
 		<testcontainers.version>1.18.1</testcontainers.version>
+		<testcontainers-redis.version>1.4.6</testcontainers-redis.version>
 	</properties>
 
 	<dependencies>
@@ -79,7 +79,7 @@
 		<dependency>
 			<groupId>com.redis.testcontainers</groupId>
 			<artifactId>testcontainers-redis-junit-jupiter</artifactId>
-			<version>${redis-testcontainers.version}</version>
+			<version>${testcontainers-redis.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

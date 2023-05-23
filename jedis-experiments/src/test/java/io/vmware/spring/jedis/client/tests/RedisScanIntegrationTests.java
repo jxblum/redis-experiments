@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,16 +29,25 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.cp.elements.lang.MathUtils;
+import org.cp.elements.lang.Nameable;
+import org.cp.elements.lang.StringUtils;
+import org.cp.elements.util.ArrayUtils;
+import org.cp.elements.util.CollectionUtils;
+import org.cp.elements.util.stream.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.util.StringUtils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import io.vmware.spring.jedis.client.support.RedisCommandsResolver;
 import io.vmware.spring.jedis.client.support.ScanIterator;
 import io.vmware.spring.jedis.client.tests.support.AbstractRedisIntegrationTests;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.commands.StringCommands;
 
@@ -167,7 +177,7 @@ public class RedisScanIntegrationTests extends AbstractRedisIntegrationTests {
 	@Test
 	public void scanIsConsistent() {
 
-		List<String> pagedKeys = new ArrayList<>();
+		Set<Book> books = new HashSet<>(ITERATIONS);
 
 		for (int iteration = 0; iteration < ITERATIONS; iteration++) {
 
@@ -175,23 +185,30 @@ public class RedisScanIntegrationTests extends AbstractRedisIntegrationTests {
 
 			ScanIterator scanIterator = ScanIterator.from(this::runInRedis, "people:doe:*", count);
 
+			List<Page> pages = new ArrayList<>();
+
 			for (int size = count; scanIterator.hasNext(); size += count) {
 
 				List<String> scanResults = scanIterator.next();
 
-				String concatenatedKeys = scanResults.stream()
-					.reduce((keyOne, keyTwo) -> keyOne.concat(";").concat(keyTwo))
-					.orElse("");
-
-				if (!pagedKeys.contains(concatenatedKeys) && StringUtils.hasText(concatenatedKeys)) {
-					pagedKeys.add(concatenatedKeys);
-				}
+				pages.add(Page.of(scanResults));
 			}
+
+			books.add(Book.of(pages).named(String.valueOf(iteration)));
 		}
 
-		assertThat(pagedKeys)
-			.describedAs("Expected paged keys List [%s] to only have a size of 2")
-			.hasSize(3);
+		Book previousBook = null;
+
+		for (Book book : books) {
+			if (previousBook == null) {
+				previousBook = book;
+			}
+			else {
+				assertThat(book)
+					.describedAs("Contents of Book [%s] are not the same as Book [%s]", book, previousBook)
+					.isEqualTo(previousBook);
+			}
+		}
 	}
 
 	@SpringBootConfiguration
@@ -200,6 +217,157 @@ public class RedisScanIntegrationTests extends AbstractRedisIntegrationTests {
 		@Bean
 		JedisPool jedisPool() {
 			return new JedisPool(redisContainer.getHost(), redisContainer.getMappedPort(REDIS_PORT));
+		}
+	}
+
+	static class Book implements Iterable<Page>, Nameable<String> {
+
+		static @NonNull Book of(Page... pages) {
+			return new Book(CollectionUtils.asList(ArrayUtils.nullSafeArray(pages, Page.class)));
+		}
+
+		static @NonNull Book of(Iterable<Page> pages) {
+			return new Book(CollectionUtils.asList(CollectionUtils.nullSafeIterable(pages)));
+		}
+
+		private final List<Page> pages;
+
+		@Getter
+		@Setter(AccessLevel.PROTECTED)
+		private String name;
+
+		private Book(@NonNull List<Page> pages) {
+			this.pages = new ArrayList<>(CollectionUtils.nullSafeList(pages));
+		}
+
+		Page getPage(int pageNumber) {
+			int index = pageNumber - 1;
+			return getPages().get(index);
+		}
+
+		List<Page> getPages() {
+			return Collections.unmodifiableList(this.pages);
+		}
+
+		int getPageCount() {
+			return getPages().size();
+		}
+
+		public @NonNull Book named(@Nullable String name) {
+			setName(name);
+			return this;
+		}
+
+		@Override
+		public Iterator<Page> iterator() {
+			return getPages().iterator();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+
+			if (this == obj) {
+				return true;
+			}
+
+			if (!(obj instanceof Book that)) {
+				return false;
+			}
+
+			if (this.getPageCount() != that.getPageCount()) {
+				return false;
+			}
+
+			for (int pageNumber = 1; pageNumber <= getPageCount(); pageNumber++) {
+				if (!this.getPage(pageNumber).equals(that.getPage(pageNumber))) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+
+			return StreamUtils.stream(this)
+				.map(Object::hashCode)
+				.reduce(MathUtils::sum)
+				.orElseGet(() -> getPages().hashCode());
+		}
+
+		@Override
+		public String toString() {
+
+			StringBuilder buffer =
+				new StringBuilder(String.format("Book [%s]:%s", getName(), StringUtils.LINE_SEPARATOR));
+
+			List<Page> pages = getPages();
+
+			for (int index = 0; index < pages.size(); index++) {
+				int pageNumber = index + 1;
+				buffer.append(pageNumber > 1 ? StringUtils.LINE_SEPARATOR : StringUtils.EMPTY_STRING);
+				buffer.append(pageNumber).append(": ").append(pages.get(index));
+			}
+
+			return buffer.toString();
+		}
+	}
+
+	static class Page implements Iterable<String> {
+
+		static @NonNull Page of(String... keys) {
+			return new Page(CollectionUtils.asList(ArrayUtils.nullSafeArray(keys, String.class)));
+		}
+
+		static @NonNull Page of(Iterable<String> keys) {
+			return new Page(CollectionUtils.asList(CollectionUtils.nullSafeIterable(keys)));
+		}
+
+		private final List<String> keys;
+
+		private Page(@NonNull List<String> keys) {
+			this.keys = new ArrayList<>(CollectionUtils.nullSafeList(keys));
+		}
+
+		List<String> getKeys() {
+			return Collections.unmodifiableList(this.keys);
+		}
+
+		@Override
+		public Iterator<String> iterator() {
+			return getKeys().iterator();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+
+			if (this == obj) {
+				return true;
+			}
+
+			if (!(obj instanceof Page that)) {
+				return false;
+			}
+
+			return this.getKeys().equals(that.getKeys());
+		}
+
+		@Override
+		public int hashCode() {
+
+			return StreamUtils.stream(this)
+				.map(Object::hashCode)
+				.reduce(MathUtils::sum)
+				.orElseGet(() -> getKeys().hashCode());
+		}
+
+		@Override
+		public String toString() {
+
+			return StreamUtils.stream(this)
+				.reduce((keyOne, keyTwo) -> keyOne.concat(";").concat(keyTwo))
+				.orElse(StringUtils.EMPTY_STRING);
 		}
 	}
 }

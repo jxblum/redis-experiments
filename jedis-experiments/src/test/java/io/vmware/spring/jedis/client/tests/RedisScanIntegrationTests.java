@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.util.StringUtils;
 
 import io.vmware.spring.jedis.client.support.RedisCommandsResolver;
 import io.vmware.spring.jedis.client.support.ScanIterator;
@@ -56,6 +57,8 @@ import redis.clients.jedis.commands.StringCommands;
 @SpringBootTest
 @SuppressWarnings("unused")
 public class RedisScanIntegrationTests extends AbstractRedisIntegrationTests {
+
+	private static final int ITERATIONS = 10;
 
 	private static final AtomicReference<Boolean> databaseInitialized = new AtomicReference<>(null);
 
@@ -103,6 +106,8 @@ public class RedisScanIntegrationTests extends AbstractRedisIntegrationTests {
 					stringCommands.set("people:frost:jack", "Jack Frost");
 					stringCommands.set("people:handy:jack", "Jack Handy");
 					stringCommands.set("people:handy:jill", "Jill Handy");
+					stringCommands.set("people:handy:mandy", "Jill Handy");
+					stringCommands.set("people:handy:sandy", "Jill Handy");
 
 					return true;
 				});
@@ -157,6 +162,36 @@ public class RedisScanIntegrationTests extends AbstractRedisIntegrationTests {
 
 			return true;
 		});
+	}
+
+	@Test
+	public void scanIsConsistent() {
+
+		List<String> pagedKeys = new ArrayList<>();
+
+		for (int iteration = 0; iteration < ITERATIONS; iteration++) {
+
+			int count = 4;
+
+			ScanIterator scanIterator = ScanIterator.from(this::runInRedis, "people:doe:*", count);
+
+			for (int size = count; scanIterator.hasNext(); size += count) {
+
+				List<String> scanResults = scanIterator.next();
+
+				String concatenatedKeys = scanResults.stream()
+					.reduce((keyOne, keyTwo) -> keyOne.concat(";").concat(keyTwo))
+					.orElse("");
+
+				if (!pagedKeys.contains(concatenatedKeys) && StringUtils.hasText(concatenatedKeys)) {
+					pagedKeys.add(concatenatedKeys);
+				}
+			}
+		}
+
+		assertThat(pagedKeys)
+			.describedAs("Expected paged keys List [%s] to only have a size of 2")
+			.hasSize(3);
 	}
 
 	@SpringBootConfiguration

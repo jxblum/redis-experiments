@@ -61,6 +61,7 @@ import redis.clients.jedis.commands.StringCommands;
  * @see redis.clients.jedis.JedisPool
  * @see io.vmware.spring.jedis.client.tests.support.AbstractRedisIntegrationTests
  * @see <a href="https://redis.io/commands/scan/">Redis SCAN command</a>
+ * @see <a href="https://www.baeldung.com/redis-list-available-keys">List All Available Redis Keys</a>
  * @since 0.1.0
  */
 @Getter

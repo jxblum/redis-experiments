@@ -132,10 +132,11 @@ public class SpringDataRedisScanIntegrationTests extends AbstractRedisIntegratio
 	}
 
 	@Test
-	public void scanIsCorrect() {
+	public void scanIsAllOrNothing() {
 
 		ScanOptions scanOptions = ScanOptions.scanOptions()
-			.match("people:doe:*") // Spring Data Redis pattern for matching is not same as Jedis pattern for matching
+			// Spring Data Redis pattern for matching is not same as Jedis pattern for matching!
+			.match("people:doe:*")
 			.count(3)
 			.build();
 

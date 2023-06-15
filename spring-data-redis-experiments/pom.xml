@@ -22,7 +22,15 @@
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jmh.version>1.36</jmh.version>
+    <spring-data-redis.version>3.2.0-SNAPSHOT</spring-data-redis.version>
   </properties>
+
+  <repositories>
+    <repository>
+      <id>Spring Snapshot</id>
+      <url>https://repo.spring.io/snapshot</url>
+    </repository>
+  </repositories>
 
   <dependencies>
     <dependency>
@@ -62,9 +70,6 @@
     </profile>
     <profile>
       <id>lettuce</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
       <dependencies>
         <dependency>
           <groupId>io.lettuce</groupId>

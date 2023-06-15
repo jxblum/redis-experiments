@@ -22,7 +22,6 @@
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jmh.version>1.36</jmh.version>
-    <spring-data-redis.version>3.2.0-SNAPSHOT</spring-data-redis.version>
   </properties>
 
   <repositories>
@@ -80,8 +79,11 @@
     <profile>
       <id>override-redis</id>
       <properties>
-        <spring-data.redis.version>3.2.0-SNAPSHOT</spring-data.redis.version>
+        <spring-data-redis.version>3.2.0-GH-2525-SNAPSHOT</spring-data-redis.version>
       </properties>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
       <dependencyManagement>
         <dependencies>
           <dependency>

@@ -28,7 +28,7 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<cp-elements.version>1.0.2</cp-elements.version>
+		<cp-elements.version>2.0.0-SNAPSHOT</cp-elements.version>
 <!--
 		<jedis.version>4.3.2</jedis.version>
 		<lettuce.version>6.2.4.RELEASE</lettuce.version>

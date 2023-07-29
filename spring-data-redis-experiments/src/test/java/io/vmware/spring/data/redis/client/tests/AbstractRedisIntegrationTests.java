@@ -65,6 +65,7 @@ public abstract class AbstractRedisIntegrationTests {
 		assertThat(redisContainer.isRunning()).isTrue();
 	}
 
+	@SuppressWarnings("unused")
 	protected static @NonNull RedisStandaloneConfiguration redisStandaloneConfiguration(
 			@NonNull RedisProperties redisProperties) {
 

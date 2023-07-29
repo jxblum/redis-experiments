@@ -15,7 +15,8 @@
  */
 package io.vmware.spring.jedis.client.support;
 
-import lombok.NonNull;
+import org.springframework.lang.NonNull;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.commands.KeyCommands;
 import redis.clients.jedis.commands.StringCommands;
@@ -30,11 +31,11 @@ import redis.clients.jedis.commands.StringCommands;
 @SuppressWarnings("unused")
 public abstract class RedisCommandsResolver {
 
-	public static KeyCommands resolveKeyCommands(@NonNull Jedis jedis) {
+	public static @NonNull KeyCommands resolveKeyCommands(@NonNull Jedis jedis) {
 		return RedisAssertions.requireObject(jedis, "Jedis object is required");
 	}
 
-	public static StringCommands resolveStringCommands(@NonNull Jedis jedis) {
+	public static @NonNull StringCommands resolveStringCommands(@NonNull Jedis jedis) {
 		return RedisAssertions.requireObject(jedis, "Jedis object is required");
 	}
 }

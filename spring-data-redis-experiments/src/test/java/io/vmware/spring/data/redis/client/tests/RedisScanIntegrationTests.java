@@ -34,6 +34,7 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.Cursor;
@@ -64,7 +65,7 @@ import lombok.Getter;
 //@ActiveProfiles("jedis")
 @DataRedisTest(properties = "spring.data.redis.repositories.enabled=false")
 @SuppressWarnings("unused")
-public class SpringDataRedisScanIntegrationTests extends AbstractRedisIntegrationTests {
+public class RedisScanIntegrationTests extends AbstractRedisIntegrationTests {
 
 	private static final AtomicReference<Boolean> databaseInitialized = new AtomicReference<>(null);
 
@@ -156,8 +157,8 @@ public class SpringDataRedisScanIntegrationTests extends AbstractRedisIntegratio
 	static class RedisTestConfiguration {
 
 		@Bean
-		RedisStandaloneConfiguration redisStandaloneConfiguration(RedisProperties redisProperties) {
-			return SpringDataRedisScanIntegrationTests.redisStandaloneConfiguration(redisProperties);
+		RedisConfiguration redisConfiguration(RedisProperties redisProperties) {
+			return redisStandaloneConfiguration(redisProperties);
 		}
 	}
 

@@ -87,6 +87,16 @@
 			<artifactId>testcontainers-redis-junit-jupiter</artifactId>
 			<version>${testcontainers-redis.version}</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>redis.clients</groupId>
+					<artifactId>jedis</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.lettuce</groupId>
+					<artifactId>lettuce-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 

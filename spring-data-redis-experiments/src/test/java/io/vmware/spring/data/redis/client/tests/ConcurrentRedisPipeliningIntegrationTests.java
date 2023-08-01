@@ -98,8 +98,9 @@ import lombok.Getter;
 @SuppressWarnings("unused")
 public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisIntegrationTests {
 
-	private static final boolean DISABLE_STORE_IN_REDIS_USING_PIPELINE_IN_PARALLEL_STREAM_TEST_CASE = true;
 	private static final boolean DISABLE_STORE_IN_REDIS_USING_PARALLEL_STREAM_IN_PIPELINE_TEST_CASE = false;
+	private static final boolean DISABLE_STORE_IN_REDIS_USING_PIPELINE_IN_PARALLEL_STREAM_TEST_CASE = true;
+	private static final boolean DISABLE_STORE_IN_REDIS_USING_SEQUENTIAL_STREAM_IN_PIPELINE_TEST_CASE = false;
 
 	private static final int ELEMENT_COUNT = 500_000;
 
@@ -148,6 +149,23 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 
 	private boolean isStoreInRedisUsingParallelStreamInPipelineDisabled() {
 		return DISABLE_STORE_IN_REDIS_USING_PARALLEL_STREAM_IN_PIPELINE_TEST_CASE;
+	}
+
+	@Test
+	@DisabledIf("isStoreInRedisUsingSequentialStreamInPipelineDisabled")
+	public void storeInRedisUsingSequentialStreamInPipeline() {
+
+		this.redisTemplate.executePipelined((RedisCallback<?>) redisConnection -> {
+
+			elements.forEach(element ->
+				redisConnection.setCommands().sAdd(SET_KEY_ONE.getBytes(), element.getBytes()));
+
+			return null;
+		});
+	}
+
+	private boolean isStoreInRedisUsingSequentialStreamInPipelineDisabled() {
+		return DISABLE_STORE_IN_REDIS_USING_SEQUENTIAL_STREAM_IN_PIPELINE_TEST_CASE;
 	}
 
 	@Test

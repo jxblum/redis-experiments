@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 
@@ -128,6 +129,7 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 	}
 
 	@Test
+	@Order(2)
 	@DisabledIf("isStoreInRedisUsingParallelStreamInPipelineDisabled")
 	void storeInRedisUsingParallelStreamInPipeline() {
 
@@ -154,6 +156,7 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 	}
 
 	@Test
+	@Order(1)
 	@DisabledIf("isStoreInRedisUsingSequentialStreamInPipelineDisabled")
 	public void storeInRedisUsingSequentialStreamInPipeline() {
 
@@ -173,6 +176,7 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 	}
 
 	@Test
+	@Order(3)
 	@SuppressWarnings("unchecked")
 	@DisabledIf("isStoreInRedisUsingPipelineInParallelStreamDisabled")
 	void storeInRedisUsingPipelineInParallelStream() {

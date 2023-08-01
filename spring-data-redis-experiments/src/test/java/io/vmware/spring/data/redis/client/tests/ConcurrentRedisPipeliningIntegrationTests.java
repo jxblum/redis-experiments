@@ -112,7 +112,7 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 	private static final int ELEMENT_COUNT = 500_000;
 
 	private static final String SET_KEY_ONE = "SetKeyOne";
-	private static final String SET_KEY_TWO = "SetKeyOne";
+	private static final String SET_KEY_TWO = "SetKeyTwo";
 
 	private static final Set<String> elements = new HashSet<>();
 
@@ -168,7 +168,7 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 		Duration duration = timed(() -> this.redisTemplate.executePipelined((RedisCallback<?>) redisConnection -> {
 
 			elements.forEach(element ->
-				redisConnection.setCommands().sAdd(SET_KEY_ONE.getBytes(), element.getBytes()));
+				redisConnection.setCommands().sAdd(SET_KEY_TWO.getBytes(), element.getBytes()));
 
 			return null;
 		}));
@@ -191,12 +191,12 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 		elements.parallelStream().forEach(element -> {
 			threadNames.add(Thread.currentThread().getName());
 			this.redisTemplate.executePipelined(toSessionCallback(redisOperations ->
-				redisOperations.opsForSet().add(SET_KEY_TWO, element)));
+				redisOperations.opsForSet().add("SetKeyThree", element)));
 		});
 
 		log("STREAM-PIPELINE THREADS [%s]%n", threadNames);
 
-		assertThat(this.redisTemplate.opsForSet().size(SET_KEY_TWO)).isEqualTo(ELEMENT_COUNT);
+		assertThat(this.redisTemplate.opsForSet().size("SetKeyThree")).isEqualTo(ELEMENT_COUNT);
 	}
 
 	private boolean isStoreInRedisUsingPipelineInParallelStreamDisabled() {

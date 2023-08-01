@@ -17,19 +17,27 @@ package io.vmware.spring.data.redis.client.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.function.Function;
+
 import com.redis.testcontainers.RedisContainer;
 
 import org.junit.jupiter.api.BeforeAll;
 
+import org.slf4j.Logger;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.lang.NonNull;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * Abstract base class for Spring Boot and Spring Data Redis Integration Tests using the Lettuce driver
+ * Abstract base class for Spring Boot and Spring Data Redis Integration Tests using the Lettuce (or Jedis) driver
  * and Testcontainers to bootstrap and configure a Redis server.
  *
  * @author John Blum
@@ -42,8 +50,12 @@ import org.testcontainers.utility.DockerImageName;
  * @see org.testcontainers.utility.DockerImageName
  * @since 0.1.0
  */
+@Slf4j
 @Testcontainers
 public abstract class AbstractRedisIntegrationTests {
+
+	protected static final boolean ENABLE_LOGGING =
+		Boolean.getBoolean("redis-experiments.logging.system-out.enabled");
 
 	protected static final int REDIS_PORT = 6379;
 
@@ -70,5 +82,44 @@ public abstract class AbstractRedisIntegrationTests {
 			@NonNull RedisProperties redisProperties) {
 
 		return new RedisStandaloneConfiguration(redisContainer.getHost(), redisContainer.getMappedPort(REDIS_PORT));
+	}
+
+	protected static Logger getLogger() {
+		return log;
+	}
+
+	protected static void log(String message, Object... arguments) {
+
+		logToLogger(message, arguments);
+
+		if (ENABLE_LOGGING) {
+			logToSystemOut(message, arguments);
+		}
+	}
+
+	private static void logToLogger(String message, Object... arguments) {
+
+		Logger logger = getLogger();
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format(message, arguments), arguments);
+		}
+	}
+
+	private static void logToSystemOut(String message, Object... arguments) {
+		System.out.printf(message, arguments);
+		System.out.flush();
+	}
+
+	@SuppressWarnings({ "rawtypes" })
+	protected @NonNull SessionCallback<?> toSessionCallback(@NonNull Function<RedisOperations, ?> sessionFunction) {
+
+		return new SessionCallback<>() {
+
+			@Override
+			public Object execute(@NonNull RedisOperations redisOperations) throws DataAccessException {
+				return sessionFunction.apply(redisOperations);
+			}
+		};
 	}
 }

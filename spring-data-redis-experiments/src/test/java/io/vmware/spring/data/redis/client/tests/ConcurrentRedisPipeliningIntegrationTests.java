@@ -35,22 +35,19 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.ActiveProfiles;
 
 import lombok.Getter;
 
 /**
- * Integration Tests for Redis Pipelining in a concurrent, multi-Threaded context.
+ * Integration Tests using Redis Pipeline in a concurrent, multi-Threaded context to load a Redis Set
+ * with {@literal Lettuce} (default), or alternatively, {@literal Jedis}.
  *
  * @author John Blum
  * @see org.junit.jupiter.api.Test
@@ -62,27 +59,28 @@ import lombok.Getter;
  */
 @Getter
 @ActiveProfiles("lettuce")
-@SuppressWarnings("unused")
 @DataRedisTest(properties = "spring.data.redis.repositories.enabled=false")
+@SuppressWarnings("unused")
 public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisIntegrationTests {
 
 	private static final boolean DISABLE_STORE_IDS_IN_REDIS_USING_PARALLEL_STREAM_THEN_PIPELINE_TEST_CASE = true;
 	private static final boolean DISABLE_STORE_IDS_IN_REDIS_USING_PIPELINE_THEN_PARALLEL_STREAM_TEST_CASE = false;
-	private static final boolean ENABLE_LOGGING = false;
 
-	private static final int ID_COUNT = 500_000;
+	private static final int ELEMENT_COUNT = 500_000;
 
 	private static final String SET_KEY_ONE = "SetKeyOne";
 	private static final String SET_KEY_TWO = "SetKeyOne";
 
-	private static final Set<String> uuids = new HashSet<>();
+	private static final Set<String> elements = new HashSet<>();
 
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 
 	@BeforeAll
-	public static void setupIds() {
-		IntStream.range(0, ID_COUNT).forEach(count -> uuids.add(UUID.randomUUID().toString()));
+	public static void createElementsToStoreInRedis() {
+
+		IntStream.range(0, ELEMENT_COUNT)
+			.forEach(count -> elements.add(UUID.randomUUID().toString()));
 	}
 
 	@BeforeEach
@@ -92,24 +90,17 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 		assertThat(this.redisTemplate.getConnectionFactory()).isInstanceOf(LettuceConnectionFactory.class);
 	}
 
-	private void log(String message, Object... arguments) {
-		if (ENABLE_LOGGING) {
-			System.out.printf(message, arguments);
-			System.out.flush();
-		}
-	}
-
 	@Test
-	@DisabledIf("isStoreIdsInRedisUsingPipelineThenParallelStream")
-	void storeIdsInRedisUsingPipelineThenParallelStream() {
+	@DisabledIf("isStoreInRedisUsingPipelineThenParallelStreamDisabled")
+	void storeInRedisUsingPipelineThenParallelStream() {
 
 		Set<String> threadNames = new ConcurrentSkipListSet<>();
 
 		this.redisTemplate.executePipelined((RedisCallback<?>) redisConnection -> {
 
-			uuids.parallelStream().forEach(id -> {
+			elements.parallelStream().forEach(element -> {
 				threadNames.add(Thread.currentThread().getName());
-				redisConnection.setCommands().sAdd(SET_KEY_ONE.getBytes(), id.getBytes());
+				redisConnection.setCommands().sAdd(SET_KEY_ONE.getBytes(), element.getBytes());
 			});
 
 			return null;
@@ -117,43 +108,33 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 
 		log("PIPELINE-STREAM THREADS [%s]%n", CollectionUtils.toString(threadNames));
 
-		assertThat(this.redisTemplate.opsForSet().size(SET_KEY_ONE)).isEqualTo(ID_COUNT);
+		assertThat(this.redisTemplate.opsForSet().size(SET_KEY_ONE)).isEqualTo(ELEMENT_COUNT);
 	}
 
-	private boolean isStoreIdsInRedisUsingPipelineThenParallelStream() {
+	private boolean isStoreInRedisUsingPipelineThenParallelStreamDisabled() {
 		return DISABLE_STORE_IDS_IN_REDIS_USING_PIPELINE_THEN_PARALLEL_STREAM_TEST_CASE;
 	}
 
 	@Test
-	@DisabledIf("isStoreIdsInRedisUsingParallelStreamThenPipeline")
-	void storeIdsInRedisUsingParallelStreamThenPipeline() {
+	@SuppressWarnings("unchecked")
+	@DisabledIf("isStoreInRedisUsingParallelStreamThenPipelineDisabled")
+	void storeInRedisUsingParallelStreamThenPipeline() {
 
 		Set<String> threadNames = new ConcurrentSkipListSet<>();
 
-		uuids.parallelStream().forEach(id -> {
+		elements.parallelStream().forEach(element -> {
 			threadNames.add(Thread.currentThread().getName());
-			this.redisTemplate.executePipelined(toSessionCallback(SET_KEY_TWO, id));
+			this.redisTemplate.executePipelined(toSessionCallback(redisOperations ->
+				redisOperations.opsForSet().add(SET_KEY_TWO, element)));
 		});
 
 		log("STREAM-PIPELINE THREADS [%s]%n", threadNames);
 
-		assertThat(this.redisTemplate.opsForSet().size(SET_KEY_TWO)).isEqualTo(ID_COUNT);
+		assertThat(this.redisTemplate.opsForSet().size(SET_KEY_TWO)).isEqualTo(ELEMENT_COUNT);
 	}
 
-	private boolean isStoreIdsInRedisUsingParallelStreamThenPipeline() {
+	private boolean isStoreInRedisUsingParallelStreamThenPipelineDisabled() {
 		return DISABLE_STORE_IDS_IN_REDIS_USING_PARALLEL_STREAM_THEN_PIPELINE_TEST_CASE;
-	}
-
-	@SuppressWarnings({ "unchecked" })
-	private SessionCallback<?> toSessionCallback(Object setKey, Object id) {
-
-		return new SessionCallback<>() {
-
-			@Override
-			public Object execute(@NonNull RedisOperations redisOperations) throws DataAccessException {
-				return redisOperations.opsForSet().add(setKey, id);
-			}
-		};
 	}
 
 	@SpringBootConfiguration

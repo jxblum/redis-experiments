@@ -62,19 +62,20 @@ import lombok.Getter;
  *
  * <pre>
  * <code>
- *     java.lang.NullPointerException: Cannot invoke "org.springframework.data.redis.connection.lettuce.LettuceResult.getResultHolder()" because "result" is null
- *
+ * java.lang.NullPointerException: Cannot invoke "org.springframework.data.redis.connection.lettuce.LettuceResult.getResultHolder()" because "result" is null
  *     at org.springframework.data.redis.connection.lettuce.LettuceConnection.closePipeline(LettuceConnection.java:437)
  *     at org.springframework.data.redis.connection.DefaultStringRedisConnection.closePipeline(DefaultStringRedisConnection.java:2456)
+ *     at org.springframework.data.redis.core.CloseSuppressingInvocationHandler.invoke(CloseSuppressingInvocationHandler.java:61)
  *     ...
- *     at jdk.proxy2/jdk.proxy2.$Proxy135.closePipeline(Unknown Source)
  *     at org.springframework.data.redis.core.RedisTemplate.lambda$executePipelined$1(RedisTemplate.java:490)
  *     at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:406)
  *     at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:373)
  *     at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:360)
  *     at org.springframework.data.redis.core.RedisTemplate.executePipelined(RedisTemplate.java:481)
  *     at org.springframework.data.redis.core.RedisTemplate.executePipelined(RedisTemplate.java:475)
- *     at io.vmware.spring.data.redis.client.tests.ConcurrentRedisPipeliningIntegrationTests.storeInRedisUsingParallelStreamInPipeline(ConcurrentRedisPipeliningIntegrationTests.java:138)
+ *     at io.vmware.spring.data.redis.client.tests.ConcurrentRedisPipeliningIntegrationTests.lambda$storeInRedisUsingParallelStreamInPipeline$3(ConcurrentRedisPipeliningIntegrationTests.java:142)
+ *     at io.vmware.spring.data.redis.client.tests.AbstractRedisIntegrationTests.timed(AbstractRedisIntegrationTests.java:121)
+ *     at io.vmware.spring.data.redis.client.tests.ConcurrentRedisPipeliningIntegrationTests.storeInRedisUsingParallelStreamInPipeline(ConcurrentRedisPipeliningIntegrationTests.java:142)
  *     ...
  * </code>
  * </pre>

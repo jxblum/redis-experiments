@@ -17,6 +17,8 @@ package io.vmware.spring.data.redis.client.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.function.Function;
 
 import com.redis.testcontainers.RedisContainer;
@@ -52,6 +54,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Testcontainers
+@SuppressWarnings("unused")
 public abstract class AbstractRedisIntegrationTests {
 
 	protected static final boolean ENABLE_LOGGING =
@@ -109,6 +112,17 @@ public abstract class AbstractRedisIntegrationTests {
 	private static void logToSystemOut(String message, Object... arguments) {
 		System.out.printf(message, arguments);
 		System.out.flush();
+	}
+
+	protected Duration timed(@NonNull Runnable runner) {
+
+		Instant beforeRunTime = Instant.now();
+
+		runner.run();
+
+		Instant afterRunTime = Instant.now();
+
+		return Duration.between(beforeRunTime, afterRunTime);
 	}
 
 	@SuppressWarnings({ "rawtypes" })

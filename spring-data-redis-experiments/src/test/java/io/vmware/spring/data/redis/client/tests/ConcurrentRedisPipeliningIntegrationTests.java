@@ -98,8 +98,8 @@ import lombok.Getter;
 @SuppressWarnings("unused")
 public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisIntegrationTests {
 
-	private static final boolean DISABLE_STORE_IDS_IN_REDIS_USING_PARALLEL_STREAM_THEN_PIPELINE_TEST_CASE = true;
-	private static final boolean DISABLE_STORE_IDS_IN_REDIS_USING_PIPELINE_THEN_PARALLEL_STREAM_TEST_CASE = false;
+	private static final boolean DISABLE_STORE_IN_REDIS_USING_PIPELINE_IN_PARALLEL_STREAM_TEST_CASE = true;
+	private static final boolean DISABLE_STORE_IN_REDIS_USING_PARALLEL_STREAM_IN_PIPELINE_TEST_CASE = false;
 
 	private static final int ELEMENT_COUNT = 500_000;
 
@@ -126,8 +126,8 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 	}
 
 	@Test
-	@DisabledIf("isStoreInRedisUsingPipelineThenParallelStreamDisabled")
-	void storeInRedisUsingPipelineThenParallelStream() {
+	@DisabledIf("isStoreInRedisUsingParallelStreamInPipelineDisabled")
+	void storeInRedisUsingParallelStreamInPipeline() {
 
 		Set<String> threadNames = new ConcurrentSkipListSet<>();
 
@@ -146,14 +146,14 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 		assertThat(this.redisTemplate.opsForSet().size(SET_KEY_ONE)).isEqualTo(ELEMENT_COUNT);
 	}
 
-	private boolean isStoreInRedisUsingPipelineThenParallelStreamDisabled() {
-		return DISABLE_STORE_IDS_IN_REDIS_USING_PIPELINE_THEN_PARALLEL_STREAM_TEST_CASE;
+	private boolean isStoreInRedisUsingParallelStreamInPipelineDisabled() {
+		return DISABLE_STORE_IN_REDIS_USING_PARALLEL_STREAM_IN_PIPELINE_TEST_CASE;
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	@DisabledIf("isStoreInRedisUsingParallelStreamThenPipelineDisabled")
-	void storeInRedisUsingParallelStreamThenPipeline() {
+	@DisabledIf("isStoreInRedisUsingPipelineInParallelStreamDisabled")
+	void storeInRedisUsingPipelineInParallelStream() {
 
 		Set<String> threadNames = new ConcurrentSkipListSet<>();
 
@@ -168,8 +168,8 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 		assertThat(this.redisTemplate.opsForSet().size(SET_KEY_TWO)).isEqualTo(ELEMENT_COUNT);
 	}
 
-	private boolean isStoreInRedisUsingParallelStreamThenPipelineDisabled() {
-		return DISABLE_STORE_IDS_IN_REDIS_USING_PARALLEL_STREAM_THEN_PIPELINE_TEST_CASE;
+	private boolean isStoreInRedisUsingPipelineInParallelStreamDisabled() {
+		return DISABLE_STORE_IN_REDIS_USING_PIPELINE_IN_PARALLEL_STREAM_TEST_CASE;
 	}
 
 	@SpringBootConfiguration

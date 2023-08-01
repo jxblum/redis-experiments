@@ -36,7 +36,9 @@ import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConfiguration;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisCallback;
@@ -48,6 +50,39 @@ import lombok.Getter;
 /**
  * Integration Tests using Redis Pipeline in a concurrent, multi-Threaded context to load a Redis Set
  * with {@literal Lettuce} (default), or alternatively, {@literal Jedis}.
+ * <p>
+ * The test(s) results in the following {@link NullPointerException} (NPE) caused by a race condition when run
+ * in a multi-Threaded context. The NPE is caused by Spring Data Redis's {@link LettuceConnection} class
+ * being non-Thread-safe, or using non-Thread-safe data structures even though {@literal Lettuce} is generally
+ * a Thread-safe Redis driver:
+ *
+ * <pre>
+ * <code>
+ *     java.lang.NullPointerException: Cannot invoke "org.springframework.data.redis.connection.lettuce.LettuceResult.getResultHolder()" because "result" is null
+ *
+ *     at org.springframework.data.redis.connection.lettuce.LettuceConnection.closePipeline(LettuceConnection.java:437)
+ *     at org.springframework.data.redis.connection.DefaultStringRedisConnection.closePipeline(DefaultStringRedisConnection.java:2456)
+ *     ...
+ *     at jdk.proxy2/jdk.proxy2.$Proxy135.closePipeline(Unknown Source)
+ *     at org.springframework.data.redis.core.RedisTemplate.lambda$executePipelined$1(RedisTemplate.java:490)
+ *     at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:406)
+ *     at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:373)
+ *     at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:360)
+ *     at org.springframework.data.redis.core.RedisTemplate.executePipelined(RedisTemplate.java:481)
+ *     at org.springframework.data.redis.core.RedisTemplate.executePipelined(RedisTemplate.java:475)
+ *     at io.vmware.spring.data.redis.client.tests.ConcurrentRedisPipeliningIntegrationTests.storeInRedisUsingPipelineThenParallelStream(ConcurrentRedisPipeliningIntegrationTests.java:99)
+ *     ...
+ * </code>
+ * </pre>
+ *
+ * The NPE does not always reproduce given the nature of a race condition.
+ * <p>
+ * Additionally, it is never safe to use the Jedis driver (client library) in a concurrent, multi-Threaded context
+ * as <a href="https://github.com/redis/jedis/wiki/Getting-started#using-jedis-in-a-multithreaded-environment">documented</a>.
+ * So, it would be expected that this test exhibit unexpected behavior due to Thread interference when run with Jedis.
+ * <p>
+ * Finally, none of Spring Data Redis's {@link RedisConnection} classes actually guarantee Thread-safety. Therefore, it
+ * is generally understood that SD Redis connections should not be shared across multiple Threads.
  *
  * @author John Blum
  * @see org.junit.jupiter.api.Test

@@ -26,8 +26,10 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.condition.DisabledIf;
 
 import org.cp.elements.util.CollectionUtils;
@@ -88,6 +90,7 @@ import lombok.Getter;
  *
  * @author John Blum
  * @see org.junit.jupiter.api.Test
+ * @see org.junit.jupiter.api.TestMethodOrder
  * @see org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest
  * @see org.springframework.data.redis.core.RedisTemplate
  * @see org.springframework.test.context.ActiveProfiles
@@ -97,6 +100,7 @@ import lombok.Getter;
 @Getter
 @ActiveProfiles("lettuce")
 @DataRedisTest(properties = "spring.data.redis.repositories.enabled=false")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SuppressWarnings("unused")
 public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisIntegrationTests {
 

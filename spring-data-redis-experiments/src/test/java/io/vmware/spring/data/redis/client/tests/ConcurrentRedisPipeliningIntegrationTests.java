@@ -72,7 +72,7 @@ import lombok.Getter;
  *     at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:360)
  *     at org.springframework.data.redis.core.RedisTemplate.executePipelined(RedisTemplate.java:481)
  *     at org.springframework.data.redis.core.RedisTemplate.executePipelined(RedisTemplate.java:475)
- *     at io.vmware.spring.data.redis.client.tests.ConcurrentRedisPipeliningIntegrationTests.storeInRedisUsingPipelineThenParallelStream(ConcurrentRedisPipeliningIntegrationTests.java:99)
+ *     at io.vmware.spring.data.redis.client.tests.ConcurrentRedisPipeliningIntegrationTests.storeInRedisUsingParallelStreamInPipeline(ConcurrentRedisPipeliningIntegrationTests.java:138)
  *     ...
  * </code>
  * </pre>

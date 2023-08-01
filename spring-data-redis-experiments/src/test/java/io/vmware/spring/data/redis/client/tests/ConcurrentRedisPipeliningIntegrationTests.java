@@ -17,6 +17,7 @@ package io.vmware.spring.data.redis.client.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -132,7 +133,7 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 
 		Set<String> threadNames = new ConcurrentSkipListSet<>();
 
-		this.redisTemplate.executePipelined((RedisCallback<?>) redisConnection -> {
+		Duration duration = timed(() -> this.redisTemplate.executePipelined((RedisCallback<?>) redisConnection -> {
 
 			elements.parallelStream().forEach(element -> {
 				threadNames.add(Thread.currentThread().getName());
@@ -140,8 +141,9 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 			});
 
 			return null;
-		});
+		}));
 
+		log("TEST DURATION %d ms", duration.toMillis());
 		log("PIPELINE-STREAM THREADS [%s]%n", CollectionUtils.toString(threadNames));
 
 		assertThat(this.redisTemplate.opsForSet().size(SET_KEY_ONE)).isEqualTo(ELEMENT_COUNT);
@@ -155,13 +157,15 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 	@DisabledIf("isStoreInRedisUsingSequentialStreamInPipelineDisabled")
 	public void storeInRedisUsingSequentialStreamInPipeline() {
 
-		this.redisTemplate.executePipelined((RedisCallback<?>) redisConnection -> {
+		Duration duration = timed(() -> this.redisTemplate.executePipelined((RedisCallback<?>) redisConnection -> {
 
 			elements.forEach(element ->
 				redisConnection.setCommands().sAdd(SET_KEY_ONE.getBytes(), element.getBytes()));
 
 			return null;
-		});
+		}));
+
+		log("TEST DURATION %d ms", duration.toMillis());
 	}
 
 	private boolean isStoreInRedisUsingSequentialStreamInPipelineDisabled() {

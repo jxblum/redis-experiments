@@ -70,7 +70,7 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 	private static final boolean DISABLE_STORE_IDS_IN_REDIS_USING_PIPELINE_THEN_PARALLEL_STREAM_TEST_CASE = false;
 	private static final boolean ENABLE_LOGGING = false;
 
-	private static final int ID_COUNT = 10_000;
+	private static final int ID_COUNT = 500_000;
 
 	private static final String SET_KEY_ONE = "SetKeyOne";
 	private static final String SET_KEY_TWO = "SetKeyOne";

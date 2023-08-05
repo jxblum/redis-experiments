@@ -28,6 +28,9 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<cp-elements.version>2.0.0-M2</cp-elements.version>
 <!--
 		<jedis.version>4.3.2</jedis.version>

@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import example.chat.bot.ChatBot;
+import example.chat.bot.provider.DespairDotComChatBot;
 import example.chat.bot.provider.FamousQuotesChatBot;
 import example.chat.service.ChatService;
 
@@ -40,6 +41,12 @@ import example.chat.service.ChatService;
 @EnableScheduling
 @SuppressWarnings("unused")
 public class ChatBotConfiguration {
+
+	@Bean
+	@Profile("despair-dot-com")
+	public DespairDotComChatBot despairDotComChatBot(ChatService chatService) {
+		return new DespairDotComChatBot(chatService);
+	}
 
 	@Bean
 	@Profile("famous-quotes")

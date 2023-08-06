@@ -27,7 +27,6 @@ import org.cp.elements.util.CollectionUtils;
 import org.cp.elements.util.stream.StreamUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 import example.chat.bot.ChatBot;
 import example.chat.model.Chat;
@@ -46,10 +45,8 @@ import lombok.Getter;
  * @see example.chat.model.Person
  * @see example.chat.service.ChatService
  * @see org.springframework.beans.factory.annotation.Qualifier
- * @see org.springframework.stereotype.Service
- * @since 1.0.0
+ * @since 0.1.0
  */
-@Service
 @Qualifier("FamousQuotes")
 @SuppressWarnings("unused")
 public class FamousQuotesChatBot implements ChatBot {

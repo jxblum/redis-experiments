@@ -16,11 +16,11 @@
 package example.chat.service.provider;
 
 import org.cp.elements.lang.annotation.NotNull;
-import org.cp.elements.service.annotation.Service;
+import org.springframework.stereotype.Service;
 
 import example.chat.event.ChatEvent;
-import example.chat.event.ChatEventPublisher;
 import example.chat.event.ChatEventListener;
+import example.chat.event.ChatEventPublisher;
 import example.chat.model.Chat;
 import example.chat.service.ChatService;
 

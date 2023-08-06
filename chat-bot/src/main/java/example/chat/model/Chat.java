@@ -59,10 +59,6 @@ public class Chat implements Renderable, Serializable {
 
 	private final Supplier<LocalDateTime> timestampSupplier = LocalDateTime::now;
 
-	public @NotNull String getMessage() {
-		return getMessage(DEFAULT_MESSAGE);
-	}
-
 	public @Nullable String getMessage(@Nullable String defaultMessage) {
 		return StringUtils.defaultIfBlank(getMessage(), defaultMessage);
 	}

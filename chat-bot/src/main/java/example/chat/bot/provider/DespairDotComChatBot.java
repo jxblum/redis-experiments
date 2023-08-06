@@ -15,13 +15,13 @@
  */
 package example.chat.bot.provider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.cp.elements.lang.ObjectUtils;
 import org.cp.elements.lang.annotation.NotNull;
-import org.cp.elements.service.annotation.Service;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -41,11 +41,9 @@ import lombok.Getter;
  * @see example.chat.model.Person
  * @see example.chat.service.ChatService
  * @see org.springframework.beans.factory.annotation.Qualifier
- * @see org.springframework.stereotype.Service
  * @see <a href="https://despair.com/">despair.com</a>
  * @since 1.0.0
  */
-@Service
 @Qualifier("DespairDotCom")
 @SuppressWarnings("unused")
 public class DespairDotComChatBot implements ChatBot {
@@ -97,7 +95,7 @@ public class DespairDotComChatBot implements ChatBot {
 	@Override
 	public Chat chat(Person person) {
 
-		List<Chat> chats = findChatsBy(person);
+		List<Chat> chats = new ArrayList<>(findChatsBy(person));
 
 		Collections.shuffle(chats);
 

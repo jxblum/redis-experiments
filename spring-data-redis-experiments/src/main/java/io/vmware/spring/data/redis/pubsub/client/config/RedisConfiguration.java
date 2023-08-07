@@ -15,17 +15,24 @@
  */
 package io.vmware.spring.data.redis.pubsub.client.config;
 
+import java.time.Duration;
+
 import org.cp.elements.lang.Renderer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.KeyExpirationEventMessageListener;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.util.ErrorHandler;
 
 import example.chat.model.Chat;
+import io.vmware.spring.data.redis.pubsub.client.data.RedisKeyValueGenerator;
 import io.vmware.spring.data.redis.pubsub.client.event.ChatMessageListener;
+import io.vmware.spring.data.redis.pubsub.client.event.ExpiringRedisKeysEventListener;
 import io.vmware.spring.data.redis.pubsub.client.support.ConsoleToStringChatRenderer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -68,5 +75,21 @@ public class RedisConfiguration {
 
 	private ErrorHandler redisMessageListenerContainerErrorHandler() {
 		return throwable -> log.warn("RedisMessageListenerContainer ERROR [{}]", throwable.getMessage(), throwable);
+	}
+
+	@Bean
+	ExpiringRedisKeysEventListener expiringRedisKeysEventListener() {
+		return new ExpiringRedisKeysEventListener();
+	}
+
+	@Bean
+	KeyExpirationEventMessageListener keyExpirationEventMessageListener(RedisMessageListenerContainer listenerContainer) {
+		return new KeyExpirationEventMessageListener(listenerContainer);
+	}
+
+	@Bean
+	@Profile("generate-redis-keys-values")
+	RedisKeyValueGenerator redisKeyValueGenerator(RedisTemplate<String, String> redisTemplate) {
+		return new RedisKeyValueGenerator(redisTemplate).withExpirationTimeout(Duration.ofSeconds(1));
 	}
 }

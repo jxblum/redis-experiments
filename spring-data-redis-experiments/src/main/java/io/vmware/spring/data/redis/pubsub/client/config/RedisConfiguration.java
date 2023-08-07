@@ -18,11 +18,10 @@ package io.vmware.spring.data.redis.pubsub.client.config;
 import org.cp.elements.lang.Renderer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.util.ErrorHandler;
 
 import example.chat.model.Chat;
@@ -55,25 +54,14 @@ public class RedisConfiguration {
 	}
 
 	@Bean
-	MessageListenerAdapter messageListenerAdapter(ChatMessageListener chatMessageListener) {
-
-		MessageListenerAdapter messageListener =
-			new MessageListenerAdapter(chatMessageListener, "receive");
-
-		messageListener.setSerializer(RedisSerializer.java());
-
-		return messageListener;
-	}
-
-	@Bean
 	RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory connectionFactory,
-			MessageListenerAdapter messageListener) {
+			MessageListener chatMessageListener) {
 
 		RedisMessageListenerContainer messageListenerContainer = new RedisMessageListenerContainer();
 
 		messageListenerContainer.setConnectionFactory(connectionFactory);
 		messageListenerContainer.setErrorHandler(redisMessageListenerContainerErrorHandler());
-		messageListenerContainer.addMessageListener(messageListener, ChannelTopic.of(CHAT_REDIS_CHANNEL_NAME));
+		messageListenerContainer.addMessageListener(chatMessageListener, ChannelTopic.of(CHAT_REDIS_CHANNEL_NAME));
 
 		return messageListenerContainer;
 	}

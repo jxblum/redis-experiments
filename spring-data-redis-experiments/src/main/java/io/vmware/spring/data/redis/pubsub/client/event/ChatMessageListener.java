@@ -15,6 +15,11 @@
  */
 package io.vmware.spring.data.redis.pubsub.client.event;
 
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.lang.NonNull;
+
 import example.chat.model.Chat;
 
 /**
@@ -27,7 +32,13 @@ import example.chat.model.Chat;
  */
 @FunctionalInterface
 @SuppressWarnings("unused")
-public interface ChatMessageListener {
+public interface ChatMessageListener extends MessageListener {
+
+	@Override
+	default void onMessage(@NonNull Message message, byte[] pattern) {
+		Chat chat = (Chat) RedisSerializer.java().deserialize(message.getBody());
+		receive(chat);
+	}
 
 	void receive(Chat chat);
 

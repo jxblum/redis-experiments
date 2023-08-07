@@ -40,6 +40,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor(staticName = "newChat")
+@SuppressWarnings("unused")
 public class Chat implements Renderable, Serializable {
 
 	public static final String DEFAULT_MESSAGE = "What?";
@@ -49,26 +50,26 @@ public class Chat implements Renderable, Serializable {
 
 	protected static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern(TIMESTAMP_PATTERN);
 
-	protected static @NotNull String toString(@NotNull LocalDateTime dateTime) {
-		return dateTime.format(TIMESTAMP_FORMATTER);
-	}
+	protected static final Supplier<LocalDateTime> TIMESTAMP_SUPPLIER = LocalDateTime::now;
 
 	private final Person person;
 
 	private final String message;
-
-	private final Supplier<LocalDateTime> timestampSupplier = LocalDateTime::now;
 
 	public @Nullable String getMessage(@Nullable String defaultMessage) {
 		return StringUtils.defaultIfBlank(getMessage(), defaultMessage);
 	}
 
 	public @NotNull LocalDateTime getTimestamp() {
-		return this.timestampSupplier.get();
+		return TIMESTAMP_SUPPLIER.get();
 	}
 
 	@Override
 	public String toString() {
 		return String.format(CHAT_TO_STRING, toString(getTimestamp()), getPerson(), getMessage());
+	}
+
+	protected @NotNull String toString(@NotNull LocalDateTime dateTime) {
+		return dateTime.format(TIMESTAMP_FORMATTER);
 	}
 }

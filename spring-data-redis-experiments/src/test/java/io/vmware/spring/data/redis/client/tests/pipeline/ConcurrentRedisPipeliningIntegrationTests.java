@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.vmware.spring.data.redis.client.tests;
+package io.vmware.spring.data.redis.client.tests.pipeline;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,6 +49,7 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
+import io.vmware.spring.data.redis.client.tests.AbstractRedisIntegrationTests;
 import lombok.Getter;
 
 /**
@@ -73,9 +74,9 @@ import lombok.Getter;
  *     at org.springframework.data.redis.core.RedisTemplate.execute(RedisTemplate.java:360)
  *     at org.springframework.data.redis.core.RedisTemplate.executePipelined(RedisTemplate.java:481)
  *     at org.springframework.data.redis.core.RedisTemplate.executePipelined(RedisTemplate.java:475)
- *     at io.vmware.spring.data.redis.client.tests.ConcurrentRedisPipeliningIntegrationTests.lambda$storeInRedisUsingParallelStreamInPipeline$3(ConcurrentRedisPipeliningIntegrationTests.java:142)
+ *     at io.vmware.spring.data.redis.client.tests.pipeline.ConcurrentRedisPipeliningIntegrationTests.lambda$storeInRedisUsingParallelStreamInPipeline$3(ConcurrentRedisPipeliningIntegrationTests.java:142)
  *     at io.vmware.spring.data.redis.client.tests.AbstractRedisIntegrationTests.timed(AbstractRedisIntegrationTests.java:121)
- *     at io.vmware.spring.data.redis.client.tests.ConcurrentRedisPipeliningIntegrationTests.storeInRedisUsingParallelStreamInPipeline(ConcurrentRedisPipeliningIntegrationTests.java:142)
+ *     at io.vmware.spring.data.redis.client.tests.pipeline.ConcurrentRedisPipeliningIntegrationTests.storeInRedisUsingParallelStreamInPipeline(ConcurrentRedisPipeliningIntegrationTests.java:142)
  *     ...
  * </code>
  * </pre>

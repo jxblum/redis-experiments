@@ -107,7 +107,7 @@ public class RedisRepositoryWithEntityHavingOffsetDateTimePropertyIntegrationTes
 		}
 
 		@Bean
-		BeanPostProcessor redisCustomConversionsBeanPostProcess() {
+		BeanPostProcessor redisCustomConversionsBeanPostProcessor() {
 
 			return new BeanPostProcessor() {
 

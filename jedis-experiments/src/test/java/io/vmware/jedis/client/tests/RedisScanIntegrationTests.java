@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.vmware.spring.jedis.client.tests;
+package io.vmware.jedis.client.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,9 +42,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import io.vmware.spring.jedis.client.support.RedisCommandsResolver;
-import io.vmware.spring.jedis.client.support.ScanIterator;
-import io.vmware.spring.jedis.client.tests.support.AbstractRedisIntegrationTests;
+import io.vmware.jedis.client.support.RedisCommandsResolver;
+import io.vmware.jedis.client.support.ScanIterator;
+import io.vmware.jedis.client.tests.support.AbstractRedisIntegrationTests;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -59,7 +59,7 @@ import redis.clients.jedis.commands.StringCommands;
  * @see org.springframework.boot.SpringBootConfiguration
  * @see org.springframework.boot.test.context.SpringBootTest
  * @see redis.clients.jedis.JedisPool
- * @see io.vmware.spring.jedis.client.tests.support.AbstractRedisIntegrationTests
+ * @see AbstractRedisIntegrationTests
  * @see <a href="https://redis.io/commands/scan/">Redis SCAN command</a>
  * @see <a href="https://www.baeldung.com/redis-list-available-keys">List All Available Redis Keys</a>
  * @since 0.1.0

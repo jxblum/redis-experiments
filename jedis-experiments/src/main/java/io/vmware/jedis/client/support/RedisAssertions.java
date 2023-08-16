@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.vmware.spring.jedis.client.support;
+package io.vmware.jedis.client.support;
 
 import java.text.MessageFormat;
 
 import org.springframework.util.Assert;
 
 /**
- * Common, reusable assertions used for Redis.
+ * Common, reusable assertions for Redis.
  *
  * @author John Blum
  * @since 0.1.0

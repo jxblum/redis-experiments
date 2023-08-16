@@ -13,22 +13,29 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.vmware.spring.jedis.client.support;
+package io.vmware.jedis.client.support;
+
+import org.springframework.lang.NonNull;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.commands.KeyCommands;
+import redis.clients.jedis.commands.StringCommands;
 
 /**
- * Java {@link FunctionalInterface} and {@literal Strategy} interface used for executing commands
- * inside Redis using Jedis.
+ * Redis Commands Resolver used to resolve Jedis command interfaces given a required {@link Jedis} instance.
  *
  * @author John Blum
- * @see java.lang.FunctionalInterface
  * @see redis.clients.jedis.Jedis
  * @since 0.1.0
  */
-@FunctionalInterface public
-interface RedisCallback<T> {
+@SuppressWarnings("unused")
+public abstract class RedisCommandsResolver {
 
-	T doInRedis(Jedis jedis);
+	public static @NonNull KeyCommands resolveKeyCommands(@NonNull Jedis jedis) {
+		return RedisAssertions.requireObject(jedis, "Jedis object is required");
+	}
 
+	public static @NonNull StringCommands resolveStringCommands(@NonNull Jedis jedis) {
+		return RedisAssertions.requireObject(jedis, "Jedis object is required");
+	}
 }

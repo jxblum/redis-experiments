@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.vmware.spring.data.redis.client.tests.repository;
+package io.vmware.spring.data.redis.tests.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +28,7 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.repository.CrudRepository;
@@ -36,7 +36,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 
-import io.vmware.spring.data.redis.client.tests.AbstractRedisIntegrationTests;
+import io.vmware.spring.data.redis.tests.AbstractRedisIntegrationTests;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -48,16 +48,19 @@ import lombok.RequiredArgsConstructor;
  * @author John Blum
  * @see java.time.OffsetDateTime
  * @see org.junit.jupiter.api.Test
+ * @see org.springframework.boot.SpringBootConfiguration
+ * @see org.springframework.boot.autoconfigure.EnableAutoConfiguration
  * @see org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest
- * @see org.springframework.data.redis.core.RedisTemplate
+ * @see org.springframework.data.redis.repository.configuration.EnableRedisRepositories
  * @see org.springframework.test.context.ContextConfiguration
- * @see io.vmware.spring.data.redis.client.tests.AbstractRedisIntegrationTests
+ * @see io.vmware.spring.data.redis.tests.AbstractRedisIntegrationTests
+ * @see io.vmware.spring.data.redis.tests.repository.RedisRepositoryWithEntityHavingOffsetDateTimePropertyIntegrationTests.RedisTestConfiguration
  * @since 0.1.0
  */
 @Getter
 @DataRedisTest
 @ContextConfiguration(classes = RedisRepositoryWithEntityHavingOffsetDateTimePropertyIntegrationTests
-	.RedisConfiguration.class)
+	.RedisTestConfiguration.class)
 @SuppressWarnings("unused")
 public class RedisRepositoryWithEntityHavingOffsetDateTimePropertyIntegrationTests
 		extends AbstractRedisIntegrationTests {
@@ -85,10 +88,10 @@ public class RedisRepositoryWithEntityHavingOffsetDateTimePropertyIntegrationTes
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
 	@EnableRedisRepositories(considerNestedRepositories = true)
-	static class RedisConfiguration {
+	static class RedisTestConfiguration {
 
 		@Bean
-		RedisStandaloneConfiguration redisConfiguration(RedisProperties redisProperties) {
+		RedisConfiguration redisConfiguration(RedisProperties redisProperties) {
 			return redisStandaloneConfiguration(redisProperties);
 		}
 	}

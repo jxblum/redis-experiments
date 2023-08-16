@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.vmware.spring.data.redis.client.tests.pipeline;
+package io.vmware.spring.data.redis.tests.pipelining;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,27 +38,24 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
-import io.vmware.spring.data.redis.client.tests.AbstractRedisIntegrationTests;
+import io.vmware.spring.data.redis.tests.AbstractRedisIntegrationTests;
 import lombok.Getter;
 
 /**
- * Integration Tests using Redis Pipeline in a concurrent, multi-Threaded context to load a Redis Set
- * with {@literal Lettuce} (default), or alternatively, {@literal Jedis}.
+ * Integration Tests for Redis Pipelining loading a Redis Set in a concurrent, multi-Threaded context
+ * using {@literal Lettuce} (default), or alternatively, {@literal Jedis}.
  * <p>
- * The test(s) results in the following {@link NullPointerException} (NPE) caused by a race condition when run
- * in a multi-Threaded context. The NPE is caused by Spring Data Redis's {@link LettuceConnection} class
- * being non-Thread-safe, or using non-Thread-safe data structures even though {@literal Lettuce} is generally
+ * The test(s) results in the following {@link NullPointerException} (NPE) caused by a race condition
+ * when run in a multi-Threaded context. The NPE is caused by Spring Data Redis's {@link LettuceConnection} class
+ * being non-Thread-safe, using non-Thread-safe data structures even though {@literal Lettuce} is generally
  * a Thread-safe Redis driver:
  *
  * <pre>
@@ -87,16 +84,17 @@ import lombok.Getter;
  * as <a href="https://github.com/redis/jedis/wiki/Getting-started#using-jedis-in-a-multithreaded-environment">documented</a>.
  * So, it would be expected that this test exhibit unexpected behavior due to Thread interference when run with Jedis.
  * <p>
- * Finally, none of Spring Data Redis's {@link RedisConnection} classes actually guarantee Thread-safety. Therefore, it
- * is generally understood that SD Redis connections should not be shared across multiple Threads.
+ * Finally, none of Spring Data Redis's {@link RedisConnection} classes actually guarantee Thread-safety. Therefore,
+ * it's generally understood that SD Redis connections should not be shared across multiple Threads.
  *
  * @author John Blum
  * @see org.junit.jupiter.api.Test
  * @see org.junit.jupiter.api.TestMethodOrder
+ * @see org.springframework.boot.SpringBootConfiguration
  * @see org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest
  * @see org.springframework.data.redis.core.RedisTemplate
  * @see org.springframework.test.context.ActiveProfiles
- * @see io.vmware.spring.data.redis.client.tests.AbstractRedisIntegrationTests
+ * @see io.vmware.spring.data.redis.tests.AbstractRedisIntegrationTests
  * @since 0.1.0
  */
 @Getter
@@ -210,16 +208,6 @@ public class ConcurrentRedisPipeliningIntegrationTests extends AbstractRedisInte
 		@Bean
 		RedisConfiguration redisConfiguration(RedisProperties redisProperties) {
 			return redisStandaloneConfiguration(redisProperties);
-		}
-	}
-
-	@Profile("lettuce")
-	@SpringBootConfiguration
-	static class LettuceTestConfiguration {
-
-		@Bean
-		LettuceClientConfiguration lettuceClientConfiguration() {
-			return LettucePoolingClientConfiguration.defaultConfiguration();
 		}
 	}
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.vmware.spring.data.redis.client.tests.scan;
+package io.vmware.spring.data.redis.tests.scan;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,28 +33,24 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConfiguration;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.test.context.ActiveProfiles;
 
-import io.vmware.spring.data.redis.client.tests.AbstractRedisIntegrationTests;
+import io.vmware.spring.data.redis.tests.AbstractRedisIntegrationTests;
 import lombok.Getter;
 
 /**
- * Integration Tests using Spring Data Redis {@link RedisTemplate} to execute the Redis {@literal SCAN} Command.
+ * Integration Tests using Spring Data Redis {@link RedisTemplate} to execute the Redis {@literal SCAN} command.
  *
  * @author John Blum
  * @see org.junit.jupiter.api.Test
  * @see org.springframework.boot.SpringBootConfiguration
  * @see org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest
- * @see org.springframework.boot.test.context.SpringBootTest
- * @see org.springframework.data.redis.connection.RedisStandaloneConfiguration
  * @see org.springframework.data.redis.core.RedisTemplate
  * @see org.springframework.test.context.ActiveProfiles
  * @see <a href="https://redis.io/commands/scan/">Redis SCAN command</a>
@@ -62,8 +58,7 @@ import lombok.Getter;
  * @since 0.1.0
  */
 @Getter
-//@SpringBootTest
-//@ActiveProfiles("jedis")
+@ActiveProfiles("jedis")
 @DataRedisTest(properties = "spring.data.redis.repositories.enabled=false")
 @SuppressWarnings("unused")
 public class RedisScanIntegrationTests extends AbstractRedisIntegrationTests {
@@ -160,16 +155,6 @@ public class RedisScanIntegrationTests extends AbstractRedisIntegrationTests {
 		@Bean
 		RedisConfiguration redisConfiguration(RedisProperties redisProperties) {
 			return redisStandaloneConfiguration(redisProperties);
-		}
-	}
-
-	@Profile("jedis")
-	@SpringBootConfiguration
-	static class JedisTestConfiguration {
-
-		@Bean
-		JedisConnectionFactory jedisConnectionFactory(RedisStandaloneConfiguration standaloneConfiguration) {
-			return new JedisConnectionFactory(standaloneConfiguration);
 		}
 	}
 }

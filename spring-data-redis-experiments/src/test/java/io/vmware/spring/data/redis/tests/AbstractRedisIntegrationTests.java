@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.vmware.spring.data.redis.client.tests;
+package io.vmware.spring.data.redis.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

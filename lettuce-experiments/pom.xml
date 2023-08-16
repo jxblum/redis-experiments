@@ -3,28 +3,28 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>io.vmware.spring</groupId>
-    <artifactId>redis-experiments</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <groupId>io.vmware.spring</groupId>
+        <artifactId>redis-experiments</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>lettuce-experiments</artifactId>
-  <packaging>jar</packaging>
+    <artifactId>lettuce-experiments</artifactId>
+    <packaging>jar</packaging>
 
-  <name>lettuce-experiments</name>
-  <description>Experiments with Redis using the Lettuce driver.</description>
+    <name>lettuce-experiments</name>
+    <description>Experiments with Redis using the Lettuce driver.</description>
 
-  <properties>
-  </properties>
+    <properties>
+    </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>io.lettuce</groupId>
-      <artifactId>lettuce-core</artifactId>
-    </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

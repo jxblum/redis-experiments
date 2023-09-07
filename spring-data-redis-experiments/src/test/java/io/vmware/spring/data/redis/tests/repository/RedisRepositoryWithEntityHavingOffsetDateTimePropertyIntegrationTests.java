@@ -68,8 +68,9 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @DataRedisTest
-@ContextConfiguration(classes = RedisRepositoryWithEntityHavingOffsetDateTimePropertyIntegrationTests
-	.RedisTestConfiguration.class)
+@ContextConfiguration(
+	classes = RedisRepositoryWithEntityHavingOffsetDateTimePropertyIntegrationTests.RedisTestConfiguration.class
+)
 @SuppressWarnings("unused")
 public class RedisRepositoryWithEntityHavingOffsetDateTimePropertyIntegrationTests
 		extends AbstractRedisIntegrationTests {

@@ -82,6 +82,7 @@ class MonoFluxIntegrationTests {
 		assertThat(exception).isInstanceOf(RuntimeException.class);
 		assertThat(exception).hasMessage("Reactive Stream processing failed");
 		assertThat(exception).hasCauseInstanceOf(NullPointerException.class);
+		assertThat(exception.getCause()).hasMessageContaining("iterator returned a null value");
 		assertThat(exception.getCause()).hasNoCause();
 	}
 }

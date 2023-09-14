@@ -17,11 +17,8 @@ package io.vmware.spring.data.redis.tests.template;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import io.vmware.spring.data.redis.tests.AbstractRedisIntegrationTests;
@@ -62,8 +59,13 @@ import reactor.core.publisher.Mono;
  * @see org.springframework.boot.SpringBootConfiguration
  * @see org.springframework.boot.autoconfigure.EnableAutoConfiguration
  * @see org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest
- * @see org.springframework.data.redis.core.RedisTemplate
  * @see org.springframework.data.redis.core.ReactiveRedisTemplate
+ * @see org.springframework.data.redis.core.RedisTemplate
+ * @see org.springframework.data.redis.serializer.RedisSerializationContext
+ * @see org.springframework.data.redis.serializer.RedisSerializer
+ * @see org.springframework.test.context.ContextConfiguration
+ * @see reactor.core.publisher.Flux
+ * @see reactor.core.publisher.Mono
  * @see io.vmware.spring.data.redis.tests.AbstractRedisIntegrationTests
  * @see <a href="https://github.com/spring-projects/spring-data-redis/issues/2655">Nullability of RedisElementReader.read(…) contradicts non-nullability of Flux.map(…)</a>
  * @since 0.1.0
@@ -81,20 +83,23 @@ public class RedisTemplateIntegrationTests extends AbstractRedisIntegrationTests
 	private StringRedisTemplate redisTemplate;
 
 	@Test
-	void synchronousAccessToRedisListWithNullValues() {
+	void imperativeAccessToRedisListWithNullValues() {
 
 		ListOperations<String, String> listOperations = getRedisTemplate().opsForList();
 
-		assertThat(storeInRedisListSynchronously("standard-redis-list", listOperations)).isEqualTo(9L);
+		// Arrange (Setup)
+		assertThat(storeInRedisListSynchronously("standard-redis-list")).isEqualTo(9L);
 		assertThat(listOperations.size("standard-redis-list")).isEqualTo(9L);
 
 		// Assert contents of Redis List
+		// Nulls become empty String and 'b' becomes null
 		assertThat(listOperations.range("standard-redis-list", 0L, 9L))
 			.containsExactly("a1", "a2", "", null, "c", null, "", "d", "e");
 	}
 
-	private Long storeInRedisListSynchronously(String redisListKey, ListOperations<String, String> listOperations) {
-		return listOperations.rightPushAll(redisListKey,"a1", "a2", null, "b", "c", "b", null, "d", "e");
+	private Long storeInRedisListSynchronously(String redisListKey) {
+		return getRedisTemplate().opsForList().rightPushAll(redisListKey,
+			"a1", "a2", null, "b", "c", "b", null, "d", "e");
 	}
 
 	@Test
@@ -102,16 +107,13 @@ public class RedisTemplateIntegrationTests extends AbstractRedisIntegrationTests
 
 		ReactiveListOperations<String, String> reactiveListOperations = getReactiveRedisTemplate().opsForList();
 
-		assertThat(storeInRedisListSynchronously("reactive-redis-list", getRedisTemplate().opsForList()))
-			.isEqualTo(9L);
-
-		//assertThat(storeInRedisListReactively("reactive-redis-list", reactiveListOperations))
-		//	.isEqualTo(9L);
-
+		// Arrange (Setup)
+		assertThat(storeInRedisListSynchronously("reactive-redis-list")).isEqualTo(9L);
+		//assertThat(storeInRedisListReactively("reactive-redis-list")).isEqualTo(9L);
 		assertThat(reactiveListOperations.size("reactive-redis-list").block()).isEqualTo(9L);
 
 		/*
-		listOperations.range(..) throws NullPointerException because stream contains null elements
+		`reactiveListOperations.range(..)` throws NullPointerException because stream contains null elements
 
 		java.lang.NullPointerException: The mapper [org.springframework.data.redis.core.DefaultReactiveListOperations$$Lambda$1167/0x00000001306ddcc0] returned a null value.
 			at reactor.core.publisher.FluxMap$MapSubscriber.onNext(FluxMap.java:108)
@@ -153,25 +155,26 @@ public class RedisTemplateIntegrationTests extends AbstractRedisIntegrationTests
 			.handle((value, sink) -> {
 				String nonNullValue = String.valueOf(value);
 				sink.next(nonNullValue);
-			});
+			})
+			.mapNotNull(value -> (String) value);
 
 		System.out.println("YOU ARE HERE!");
 
 		// Assert contents of Redis List
+		// Nulls and 'b' become empty String
 		assertThat(results.toStream().toList())
 			.containsExactly("a1", "a2", "null", "null", "c", "null", "null", "d", "e");
 	}
 
-	private Long storeInRedisListReactively(String redisListKey,
-			ReactiveListOperations<String, String> listOperations) {
+	private Long storeInRedisListReactively(String redisListKey) {
 
 		// The reactive streams specification disallows null values in a sequence.
 		// Therefore, this will throw an Exception when subscribed to.
-		Mono<Long> pushAllOp = listOperations.rightPushAll(redisListKey,
+		Mono<Long> rightPushAllOp = getReactiveRedisTemplate().opsForList().rightPushAll(redisListKey,
 			"a1", "a2", null, "b", "c", "b", null, "d", "e");
 
 		/*
-		 `pushAllOp.block()` threw NullPointerException:
+		 `rightPushAllOp.block()` threw NullPointerException because stream contained null elements
 
 		 java.lang.NullPointerException: The iterator returned a null value
 			at java.base/java.util.Objects.requireNonNull(Objects.java:233)
@@ -201,22 +204,7 @@ public class RedisTemplateIntegrationTests extends AbstractRedisIntegrationTests
 				... 71 more
 		 */
 
-		return pushAllOp.block();
-	}
-
-	@Test
-	void fluxWithNullStreamOfElements() {
-
-		AtomicReference<Optional<RuntimeException>> causeReference = new AtomicReference<>(Optional.empty());
-
-		Flux.fromIterable(Arrays.asList(0, 1, 2, null, 4, null, null, null, 8, null))
-			.filter(Objects::nonNull)
-			.handle((value, sink) -> sink.next(value != null ? value : 0))
-			.onErrorContinue((cause, value) -> {})
-			.subscribe(System.out::println, cause ->
-				causeReference.set(Optional.of(new RuntimeException("Reactive Stream processing failed", cause))));
-
-		causeReference.get().ifPresent(cause -> { throw cause; });
+		return rightPushAllOp.block();
 	}
 
 	@SpringBootConfiguration
@@ -235,8 +223,11 @@ public class RedisTemplateIntegrationTests extends AbstractRedisIntegrationTests
 
 			StringRedisTemplate redisTemplate = new StringRedisTemplate(connectionFactory);
 
+			Function<String, String> serializationFunction = value -> "b".equals(value) ? value.toUpperCase() : value;
+			Function<String, String> deserializationFunction = value -> "B".equals(value) ? null : value;
+
 			redisTemplate.setKeySerializer(RedisSerializer.string());
-			redisTemplate.setValueSerializer(customStringRedisSerializer(value -> "b".equals(value) ? null : value));
+			redisTemplate.setValueSerializer(customStringRedisSerializer(serializationFunction, deserializationFunction));
 
 			return redisTemplate;
 		}
@@ -251,18 +242,20 @@ public class RedisTemplateIntegrationTests extends AbstractRedisIntegrationTests
 		@Bean
 		RedisSerializationContext<String, String> redisSerializationContext() {
 
+			Function<String, String> serializationFunction = String::valueOf;
+
+			//Function<String, String> deserializationFunction =
+			//	value -> Set.of("b", "", "null").contains(value) ? null : value;
+
+			Function<String, String> deserializationFunction =
+				value -> Set.of("B", "b", "").contains(value) ? "null" : value;
+
 			return RedisSerializationContext.<String, String>newSerializationContext()
 				.key(RedisSerializer.string())
-				//.value(customStringRedisSerializer(String::valueOf, value -> Set.of("b", "", "null").contains(value) ? null : value))
-				.value(customStringRedisSerializer(String::valueOf, value -> Set.of("b", "").contains(value) ? "null" : value))
+				.value(customStringRedisSerializer(serializationFunction, deserializationFunction))
 				.hashKey(RedisSerializer.java())
 				.hashValue(RedisSerializer.java())
 				.build();
-		}
-
-		StringRedisSerializer customStringRedisSerializer(Function<String, String> deserializationFunction) {
-			return customStringRedisSerializer(Function.identity(), deserializationFunction);
-
 		}
 
 		StringRedisSerializer customStringRedisSerializer(Function<String, String> serializationFunction,

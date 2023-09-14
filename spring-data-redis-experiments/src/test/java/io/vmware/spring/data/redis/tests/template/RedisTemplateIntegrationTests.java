@@ -17,8 +17,11 @@ package io.vmware.spring.data.redis.tests.template;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import io.vmware.spring.data.redis.tests.AbstractRedisIntegrationTests;
@@ -199,6 +202,21 @@ public class RedisTemplateIntegrationTests extends AbstractRedisIntegrationTests
 		 */
 
 		return pushAllOp.block();
+	}
+
+	@Test
+	void fluxWithNullStreamOfElements() {
+
+		AtomicReference<Optional<RuntimeException>> causeReference = new AtomicReference<>(Optional.empty());
+
+		Flux.fromIterable(Arrays.asList(0, 1, 2, null, 4, null, null, null, 8, null))
+			.filter(Objects::nonNull)
+			.handle((value, sink) -> sink.next(value != null ? value : 0))
+			.onErrorContinue((cause, value) -> {})
+			.subscribe(System.out::println, cause ->
+				causeReference.set(Optional.of(new RuntimeException("Reactive Stream processing failed", cause))));
+
+		causeReference.get().ifPresent(cause -> { throw cause; });
 	}
 
 	@SpringBootConfiguration

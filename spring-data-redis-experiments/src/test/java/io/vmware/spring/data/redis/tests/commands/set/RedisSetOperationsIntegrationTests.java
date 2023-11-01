@@ -49,6 +49,7 @@ import lombok.Getter;
  * @see org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest
  * @see org.springframework.data.redis.connection.RedisSetCommands
  * @see org.springframework.data.redis.core.StringRedisTemplate;
+ * @see <a href="https://github.com/spring-projects/spring-data-redis/issues/2759">RedisSetCommands.isMember(K key, Object... objects) throws ClassCastException</a>
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)

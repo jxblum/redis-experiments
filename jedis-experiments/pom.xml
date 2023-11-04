@@ -19,12 +19,26 @@
 
     <properties>
         <google-findbugs.version>3.0.2</google-findbugs.version>
+        <spring-ai.version>0.7.0-SNAPSHOT</spring-ai.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>spring-snapshot-repo</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.experimental.ai</groupId>
+            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+            <version>${spring-ai.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

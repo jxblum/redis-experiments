@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.vmware.jedis.client.tests;
+package io.vmware.jedis.client.tests.scan;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,6 +25,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+
+import io.vmware.jedis.client.support.RedisCommandsResolver;
+import io.vmware.jedis.client.support.ScanIterator;
+import io.vmware.jedis.client.tests.support.AbstractRedisIntegrationTests;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,9 +46,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import io.vmware.jedis.client.support.RedisCommandsResolver;
-import io.vmware.jedis.client.support.ScanIterator;
-import io.vmware.jedis.client.tests.support.AbstractRedisIntegrationTests;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -58,8 +59,8 @@ import redis.clients.jedis.commands.StringCommands;
  * @see org.junit.jupiter.api.Test
  * @see org.springframework.boot.SpringBootConfiguration
  * @see org.springframework.boot.test.context.SpringBootTest
+ * @see io.vmware.jedis.client.tests.support.AbstractRedisIntegrationTests
  * @see redis.clients.jedis.JedisPool
- * @see AbstractRedisIntegrationTests
  * @see <a href="https://redis.io/commands/scan/">Redis SCAN command</a>
  * @see <a href="https://www.baeldung.com/redis-list-available-keys">List All Available Redis Keys</a>
  * @since 0.1.0

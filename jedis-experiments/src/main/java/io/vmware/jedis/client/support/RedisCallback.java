@@ -26,8 +26,8 @@ import redis.clients.jedis.Jedis;
  * @see redis.clients.jedis.Jedis
  * @since 0.1.0
  */
-@FunctionalInterface public
-interface RedisCallback<T> {
+@FunctionalInterface
+public interface RedisCallback<T> {
 
 	T doInRedis(Jedis jedis);
 

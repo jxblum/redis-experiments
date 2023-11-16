@@ -34,7 +34,6 @@ import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisSetCommands;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.ContextConfiguration;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -53,7 +52,6 @@ import lombok.Getter;
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)
-@ContextConfiguration(classes = RedisSetOperationsIntegrationTests.TestConfiguration.class)
 @DataRedisTest(excludeAutoConfiguration = RedisRepositoriesAutoConfiguration.class)
 @SuppressWarnings("unused")
 public class RedisSetOperationsIntegrationTests extends AbstractRedisIntegrationTests {
@@ -62,7 +60,7 @@ public class RedisSetOperationsIntegrationTests extends AbstractRedisIntegration
 	private StringRedisTemplate template;
 
 	@Test
-	void setIsMembersWorksCorrectly() {
+	void redisSetIsMembersWorksCorrectly() {
 
 		SetOperations<String, String> setOperations = getTemplate().opsForSet();
 

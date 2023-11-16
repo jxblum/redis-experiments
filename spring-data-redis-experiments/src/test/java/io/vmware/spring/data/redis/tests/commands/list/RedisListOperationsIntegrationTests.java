@@ -17,6 +17,7 @@ package io.vmware.spring.data.redis.tests.commands.list;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -36,7 +37,10 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 /**
  * Integration Tests for {@link ListOperations} and {@link RedisListCommands} from Spring Data Redis.
@@ -58,24 +62,26 @@ import lombok.Getter;
 public class RedisListOperationsIntegrationTests extends AbstractRedisIntegrationTests {
 
 	@Autowired
-	private RedisTemplate<Object, Object> redisTemplate;
+	@SuppressWarnings("rawtypes")
+	private RedisTemplate redisTemplate;
 
 	@Test
 	@SuppressWarnings("all")
-	void redisListOperationsWorksCorrectly() {
+	void redisListOperationsWorkCorrectly() {
 
-		ListOperations<Object, Object> listOperations = getRedisTemplate().opsForList();
+		ListOperations<Object, User> listOperations = getRedisTemplate().opsForList();
 
-		Collection<Object> strings = List.of("test", "testing", "tested");
+		Collection<User> users = List.of(User.as("JonDoe"), User.as("JaneDoe"));
 
-		assertThat(listOperations.size("TestList")).isZero();
+		assertThat(listOperations.size("UserList")).isZero();
 
-		Long listSize = listOperations.rightPushAll("TestList", strings);
+		Long listSize = listOperations.rightPushAll("UserList", users);
 
-		assertThat(listSize).isEqualTo(3L);
+		assertThat(listSize).isEqualTo(2L);
 
-		assertThat(listOperations.rightPop("TestList", listSize)).containsExactly("tested", "testing", "test");
-		assertThat(listOperations.size("TestList")).isZero();
+		assertThat(listOperations.rightPop("UserList", listSize))
+			.containsExactly(User.as("JaneDoe"), User.as("JonDoe"));
+		assertThat(listOperations.size("UserList")).isZero();
 	}
 
 	@SpringBootConfiguration
@@ -86,5 +92,13 @@ public class RedisListOperationsIntegrationTests extends AbstractRedisIntegratio
 		RedisConfiguration redisConfiguration(RedisProperties redisProperties) {
 			return redisStandaloneConfiguration(redisProperties);
 		}
+	}
+
+	@Getter
+	@ToString
+	@EqualsAndHashCode
+	@RequiredArgsConstructor(staticName = "as")
+	static class User implements Serializable {
+		private final String name;
 	}
 }

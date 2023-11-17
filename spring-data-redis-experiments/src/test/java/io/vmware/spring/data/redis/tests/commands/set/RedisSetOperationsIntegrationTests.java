@@ -30,8 +30,8 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.connection.RedisConfiguration;
 import org.springframework.data.redis.connection.RedisSetCommands;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -79,7 +79,7 @@ public class RedisSetOperationsIntegrationTests extends AbstractRedisIntegration
 	static class TestConfiguration {
 
 		@Bean
-		RedisConfiguration redisConfiguration(RedisProperties redisProperties) {
+		RedisStandaloneConfiguration redisConfiguration(RedisProperties redisProperties) {
 			return redisStandaloneConfiguration(redisProperties);
 		}
 	}

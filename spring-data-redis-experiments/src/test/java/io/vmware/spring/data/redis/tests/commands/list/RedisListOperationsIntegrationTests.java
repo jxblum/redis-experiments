@@ -18,7 +18,6 @@ package io.vmware.spring.data.redis.tests.commands.list;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 
 import io.vmware.spring.data.redis.tests.AbstractRedisIntegrationTests;
@@ -31,8 +30,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.connection.RedisConfiguration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisListCommands;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -62,16 +62,15 @@ import lombok.ToString;
 public class RedisListOperationsIntegrationTests extends AbstractRedisIntegrationTests {
 
 	@Autowired
-	@SuppressWarnings("rawtypes")
-	private RedisTemplate redisTemplate;
+	private RedisTemplate<String, User> redisTemplate;
 
 	@Test
 	@SuppressWarnings("all")
 	void redisListOperationsWorkCorrectly() {
 
-		ListOperations<Object, User> listOperations = getRedisTemplate().opsForList();
+		ListOperations<String, User> listOperations = getRedisTemplate().opsForList();
 
-		Collection<User> users = List.of(User.as("JonDoe"), User.as("JaneDoe"));
+		List<User> users = List.of(User.as("JonDoe"), User.as("JaneDoe"));
 
 		assertThat(listOperations.size("UserList")).isZero();
 
@@ -82,6 +81,13 @@ public class RedisListOperationsIntegrationTests extends AbstractRedisIntegratio
 		assertThat(listOperations.rightPop("UserList", listSize))
 			.containsExactly(User.as("JaneDoe"), User.as("JonDoe"));
 		assertThat(listOperations.size("UserList")).isZero();
+
+		listSize = listOperations.leftPushAll("UserList", User.as("PieDoe"), User.as("SourDoe"));
+
+		assertThat(listOperations.size("UserList")).isEqualTo(2);
+		assertThat(listOperations.leftPop("UserList", listSize))
+			.containsExactly(User.as("SourDoe"), User.as("PieDoe"));
+		assertThat(listOperations.size("UserList")).isZero();
 	}
 
 	@SpringBootConfiguration
@@ -89,8 +95,15 @@ public class RedisListOperationsIntegrationTests extends AbstractRedisIntegratio
 	static class TestConfiguration {
 
 		@Bean
-		RedisConfiguration redisConfiguration(RedisProperties redisProperties) {
+		RedisStandaloneConfiguration redisConfiguration(RedisProperties redisProperties) {
 			return redisStandaloneConfiguration(redisProperties);
+		}
+
+		@Bean
+		RedisTemplate<String, User> userRedisTemplate(RedisConnectionFactory connectionFactory) {
+			RedisTemplate<String, User> userRedisTemplate = new RedisTemplate<>();
+			userRedisTemplate.setConnectionFactory(connectionFactory);
+			return userRedisTemplate;
 		}
 	}
 
